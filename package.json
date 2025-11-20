@@ -7,9 +7,9 @@
   "types": "dist/index.d.ts",
   "exports": {
     ".": {
+      "types": "./dist/index.d.ts",
       "import": "./dist/index.mjs",
-      "require": "./dist/index.js",
-      "types": "./dist/index.d.ts"
+      "require": "./dist/index.js"
     }
   },
   "files": [
@@ -35,11 +35,11 @@
     "ai",
     "typescript"
   ],
-  "author": "",
+  "author": "Keith Minkler <kminkler@gmail.com>",
   "license": "MIT",
   "repository": {
     "type": "git",
-    "url": ""
+    "url": "https://github.com/keith301/sloppy-parser-js.git"
   },
   "devDependencies": {
     "@types/node": "^20.10.0",

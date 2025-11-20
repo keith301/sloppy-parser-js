@@ -362,6 +362,7 @@ export class SoftParser {
     const current = candidates[0];
     
     // If we're at a token that's clearly part of YAML, continue
+    // Note: BRACE_OPEN is allowed for inline JSON within YAML values
     if (current.type === "DASH" ||
         current.type === "BARE_WORD" ||
         current.type === "STRING" ||
@@ -370,21 +371,23 @@ export class SoftParser {
         current.type === "NULL" ||
         current.type === "COLON" ||
         current.type === "WHITESPACE" ||
-        current.type === "NEWLINE") {
+        current.type === "NEWLINE" ||
+        current.type === "BRACE_OPEN") {
       
       // But if it's a newline, check what comes after it
       if (current.type === "NEWLINE") {
         this.tokenizer.consumeBest(); // consume newline
         
         // Skip any additional whitespace
-        let token = this.tokenizer.consumeBest();
-        while (token && token.type === "WHITESPACE") {
-          token = this.tokenizer.consumeBest();
+        while (this.tokenizer.nextTokenCandidates().length > 0 && 
+               this.tokenizer.nextTokenCandidates()[0].type === "WHITESPACE") {
+          this.tokenizer.consumeBest();
         }
         
-        // Check if next line continues YAML
-        const nextIsYAML = token && (
-          token.type === "DASH" ||
+        // Now check what's next
+        const nextCandidates = this.tokenizer.nextTokenCandidates();
+        const nextIsYAML = nextCandidates.length > 0 && (
+          nextCandidates[0].type === "DASH" ||
           this.looksLikeYAMLKey()
         );
         
@@ -396,9 +399,8 @@ export class SoftParser {
       return true;
     }
     
-    // Structural tokens end YAML
-    if (current.type === "BRACE_OPEN" ||
-        current.type === "BRACKET_OPEN" ||
+    // Structural tokens end YAML (except BRACE_OPEN which can be inline JSON)
+    if (current.type === "BRACKET_OPEN" ||
         current.type === "FENCE_END") {
       this.tokenizer.seek(checkpoint);
       return false;
